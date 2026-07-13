@@ -89,9 +89,9 @@ if __name__ == "__main__":
     sigma = 10
     rho = 28
     beta = 8/3
-    time_horizon = 0.3
+    time_horizon = 1.0
     x0 = 1.0
-    y0 = 1.0
+    y0 = 0.2
     z0 = 1.0
     epochs = 5000
     print_every = 500
@@ -147,7 +147,7 @@ if __name__ == "__main__":
     plt.plot(t, z, "--", label="Exact z")
     plt.xlabel("t")
     plt.ylabel("state")
-    plt.title(f"Lorenz attractor PINN fit (time horizon = {time_horizon})")
+    plt.title(f"Lorenz attractor PINN fit (T = {time_horizon}; x0 = {x0}, y0 = {y0}, z0 = {z0})")
     plt.legend()
 
     os.makedirs("figures", exist_ok=True)

@@ -10,7 +10,7 @@ plt.rcParams['font.serif'] = ['Computer Modern']
 plt.rcParams['text.latex.preamble'] = r'\usepackage{amsmath, amssymb}'
 from scipy.integrate import solve_ivp
 
-"""Sampling function for generating training data withing the time horizon"""
+"""Sampling function for generating training data within the time horizon"""
 def latin_hypercube(n: int, a: float, b: float) -> torch.Tensor:
     edges = torch.linspace(0, 1, n + 1)
     u = torch.rand(n)

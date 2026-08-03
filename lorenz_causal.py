@@ -30,7 +30,7 @@ def grad(outputs: torch.Tensor, inputs: torch.Tensor) -> torch.Tensor:
 
 """Loss function computing the residuals of the Lorenz system equations"""
 def physics_loss(model: nn.Module, sigma: float, rho: float, beta: float, dt: float, verbose: bool = False) -> torch.Tensor:
-    ts = latin_hypercube(3000, 0, dt).requires_grad_(True)
+    ts = latin_hypercube(1000, 0, dt).requires_grad_(True)
     u = model(ts)
 
     x, y, z = u[:, 0], u[:, 1], u[:, 2]
@@ -64,14 +64,14 @@ class Net(nn.Module):
             nn.Linear(64, 3)
         )
 
-    """Forward pass; tau is the normalized time input, output is the hard-constrained state (x, y, z)"""
+    """Forward pass; tau is the unnormalized time input, s is the normalized time input, output is the hard-constrained state (x, y, z)"""
     def forward(self, tau: torch.Tensor) -> torch.Tensor:
         s = tau / self.time_horizon
         result = self.linear_stack(s)
         return torch.cat([
-            self.x0 + tau * result[:, 0:1],
-            self.y0 + tau * result[:, 1:2],
-            self.z0 + tau * result[:, 2:3],
+            self.x0 + tau * 5 * result[:, 0:1],
+            self.y0 + tau * 5 * result[:, 1:2],
+            self.z0 + tau * 5 * result[:, 2:3],
         ], dim=1)
 
     """Predict the state variables with the model in evaluation mode"""
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     y0 = 0.2
     z0 = 1.0
     z_star = rho - 1
-    epochs = 5_000
+    epochs = 15_000
     print_every = 500
     t0 = 0.0
 
@@ -114,11 +114,11 @@ if __name__ == "__main__":
     t = np.linspace(0, max_time_horizon, 10000)
     x, y, z = solution.sol(t)
 
-    plt.title(f"Lorenz attractor PINN fit (x0 = {x0}, y0 = {y0}, z0 = {z0})")
+    plt.title(f"Lorenz attractor PINN fit (T = {max_time_horizon}, epochs = {epochs})")
 
-    plt.plot(t, x, "--", label="Exact x")
-    plt.plot(t, y, "--", label="Exact y")
-    plt.plot(t, z, "--", label="Exact z")
+    plt.plot(t, x, "--", label="Exact x", color="red")
+    plt.plot(t, y, "--", label="Exact y", color="blue")
+    plt.plot(t, z, "--", label="Exact z", color="green")
 
 
     stable = z > z_star
@@ -172,6 +172,7 @@ if __name__ == "__main__":
 
         end_pred = net.predict(torch.tensor([[dt]], dtype=torch.float32))
         x0, y0, z0 = end_pred[0]
+        # x0, y0, z0 = solution.sol(time_horizon)
         t0 = time_horizon
 
     plt.xlabel("t")
